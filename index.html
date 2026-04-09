@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Timeline Redesign — Engineering Handoff</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F7F4EF;
+      --bg-alt: #EFEBE4;
+      --text: #1E1B16;
+      --text-2: #6B6560;
+      --text-3: #9C958D;
+      --accent: #4F46E5;
+      --accent-hover: #4338CA;
+      --accent-light: #EDECFE;
+      --surface: #EDEAE4;
+      --border: #DDD8CF;
+      --border-light: #EAE6DF;
+      --warning-bg: #FEF9F0;
+      --warning-border: #E5A84B;
+      --warning-text: #8B6914;
+      --success: #2D8A4E;
+      --user-bg: #E4EDFC;
+      --user-accent: #4A7BF7;
+      --agent-bg: #F0EDE7;
+      --tool-bg: #F8F6F2;
+      --tool-accent: #A09A92;
+      --burst-accent: #6C63E8;
+
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+      --space-3xl: 6rem;
+
+      --max-w: 54rem;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== NAV ===== */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0.75rem var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .nav-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+    }
+    .nav-links {
+      display: flex;
+      gap: var(--space-xs);
+    }
+    .nav-links a {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      transition: color 150ms, background 150ms;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: var(--space-3xl) var(--space-lg) var(--space-2xl);
+    }
+    .hero-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: var(--space-md);
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw + 1rem, 4rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-lg);
+    }
+    .hero-summary {
+      font-size: clamp(1.05rem, 1.5vw + 0.5rem, 1.25rem);
+      color: var(--text-2);
+      max-width: 38rem;
+      line-height: 1.55;
+      margin-bottom: var(--space-xl);
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+    .hero-meta span {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-3);
+      background: var(--surface);
+      padding: 0.25rem 0.65rem;
+      border-radius: 100px;
+    }
+
+    /* ===== SECTIONS ===== */
+    .section {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: var(--space-3xl) var(--space-lg) 0;
+      scroll-margin-top: 4rem;
+    }
+    .section:last-of-type { padding-bottom: var(--space-3xl); }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+      margin-bottom: var(--space-sm);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-md);
+    }
+    .section-desc {
+      color: var(--text-2);
+      max-width: 36rem;
+      margin-bottom: var(--space-xl);
+      line-height: 1.6;
+    }
+
+    /* ===== DEMO ===== */
+    .demo-toggle {
+      display: inline-flex;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 3px;
+      margin-bottom: var(--space-lg);
+    }
+    .demo-toggle button {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.45rem 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 200ms var(--ease-out-quart);
+    }
+    .demo-toggle button.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .demo-panel {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .demo-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      background: var(--bg-alt);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .demo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .demo-bar-label {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+    }
+    .demo-content {
+      padding: var(--space-md) var(--space-md) var(--space-lg);
+      min-height: 380px;
+    }
+    .demo-view { display: none; }
+    .demo-view.active { display: block; }
+
+    .demo-count {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-3);
+      margin-bottom: var(--space-md);
+      padding-right: 2px;
+    }
+
+    /* wireframe items */
+    .w-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 2px;
+      transition: background 150ms;
+    }
+    .w-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      margin-top: 1px;
+    }
+    .w-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+    .w-body { flex: 1; min-width: 0; }
+    .w-role {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+    .w-text {
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .w-user { background: var(--user-bg); }
+    .w-user .w-avatar { background: var(--user-accent); color: #fff; }
+    .w-user .w-role { color: var(--user-accent); }
+
+    .w-agent { background: var(--agent-bg); }
+    .w-agent .w-avatar { background: var(--text-3); color: #fff; font-size: 13px; }
+    .w-agent .w-role { color: var(--text-2); }
+    .w-agent .w-text { color: var(--text-2); }
+
+    .w-tool .w-icon { background: var(--tool-bg); border: 1px solid var(--border-light); color: var(--tool-accent); }
+    .w-tool .w-text { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-2); }
+
+    .w-thinking .w-icon { background: var(--accent-light); border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font-size: 13px; }
+    .w-thinking .w-text { font-size: 0.8rem; color: var(--text-2); font-style: italic; }
+
+    /* burst */
+    .w-burst-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 150ms;
+      user-select: none;
+    }
+    .w-burst-header:hover { background: var(--accent-light); }
+    .w-burst-chevron {
+      font-size: 11px;
+      color: var(--burst-accent);
+      transition: transform 300ms var(--ease-out-expo);
+      display: inline-block;
+      width: 16px;
+      text-align: center;
+    }
+    .w-burst.expanded .w-burst-chevron { transform: rotate(90deg); }
+    .w-burst-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--burst-accent);
+    }
+    .w-burst-duration {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-3);
+      margin-left: auto;
+    }
+    .w-burst-children {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 350ms var(--ease-out-expo);
+    }
+    .w-burst.expanded .w-burst-children {
+      grid-template-rows: 1fr;
+    }
+    .w-burst-inner {
+      overflow: hidden;
+      padding-left: 24px;
+      border-left: 2px solid var(--accent-light);
+      margin-left: 17px;
+    }
+    .w-burst-inner .w-item { padding: 5px 10px; }
+
+    /* working indicator */
+    .w-working {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      position: relative;
+      margin: 0 8px;
+    }
+    .pulse-dot::before, .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .pulse-dot::before {
+      animation: pulse-ring 1.2s ease-out infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.8); opacity: 0; }
+    }
+    .shimmer-text {
+      font-size: 0.85rem;
+      color: var(--text-3);
+      background: linear-gradient(90deg, var(--text-3) 0%, var(--text-3) 40%, var(--accent) 50%, var(--text-3) 60%, var(--text-3) 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 2s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    .demo-caption {
+      margin-top: var(--space-md);
+      font-size: 0.8rem;
+      color: var(--text-3);
+      text-align: center;
+    }
+    .demo-caption strong { color: var(--text-2); font-weight: 600; }
+
+    /* screenshot placeholder */
+    .screenshot-slot {
+      margin-top: var(--space-lg);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: var(--space-xl) var(--space-lg);
+      text-align: center;
+      color: var(--text-3);
+      font-size: 0.8rem;
+    }
+    .screenshot-slot span { display: block; font-size: 1.2rem; margin-bottom: var(--space-sm); }
+
+    /* ===== ROADMAP ===== */
+    .roadmap-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .rm-node {
+      position: relative;
+      border-left: 2px solid var(--border);
+      padding-left: var(--space-lg);
+      padding-bottom: var(--space-md);
+    }
+    .rm-node:last-child { border-left-color: transparent; }
+    .rm-node::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      transition: border-color 200ms, background 200ms;
+    }
+    .rm-node.p1::before { border-color: var(--accent); background: var(--accent-light); }
+    .rm-node.p2::before { border-color: var(--warning-border); background: var(--warning-bg); }
+    .rm-node.p3::before { border-color: var(--text-3); }
+
+    .rm-header {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-sm);
+      cursor: pointer;
+      padding: 4px 0;
+      flex-wrap: wrap;
+    }
+    .rm-header:hover .rm-title { color: var(--accent); }
+    .rm-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-3);
+      flex-shrink: 0;
+    }
+    .rm-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color 200ms;
+    }
+    .rm-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .rm-badge.p1 { background: var(--accent-light); color: var(--accent); }
+    .rm-badge.p2 { background: var(--warning-bg); color: var(--warning-text); }
+    .rm-badge.p3 { background: var(--surface); color: var(--text-3); }
+    .rm-tag {
+      font-size: 0.7rem;
+      color: var(--text-3);
+      font-style: italic;
+    }
+    .rm-depends {
+      font-size: 0.72rem;
+      color: var(--text-3);
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+    .rm-depends code {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: var(--surface);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .rm-details {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 400ms var(--ease-out-expo);
+    }
+    .rm-node.expanded .rm-details { grid-template-rows: 1fr; }
+    .rm-details-inner {
+      overflow: hidden;
+    }
+    .rm-detail-content {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .rm-detail-content p { margin-bottom: var(--space-sm); }
+    .rm-detail-content p:last-child { margin-bottom: 0; }
+    .rm-detail-content strong { font-weight: 600; }
+
+    .rm-files {
+      margin-top: var(--space-sm);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .rm-file {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: var(--surface);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--text-2);
+    }
+    .rm-scope {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-3);
+      margin-top: var(--space-sm);
+    }
+    .rm-chevron {
+      font-size: 10px;
+      color: var(--text-3);
+      transition: transform 250ms var(--ease-out-expo);
+      display: inline-block;
+    }
+    .rm-node.expanded .rm-chevron { transform: rotate(90deg); }
+
+    .rm-fork {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 var(--space-lg);
+      margin-left: calc(-1 * var(--space-lg) - 2px);
+      padding-left: 2px;
+    }
+    .rm-fork .rm-node {
+      border-left: 2px solid var(--border);
+      padding-left: var(--space-lg);
+    }
+
+    /* ===== ARCHITECTURE ===== */
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .arch-step {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+      position: relative;
+    }
+    .arch-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 100%;
+      width: 2px;
+      height: var(--space-md);
+      background: var(--border);
+    }
+    .arch-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+    .arch-step.highlight .arch-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .arch-body { flex: 1; }
+    .arch-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+    .arch-name code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .arch-desc {
+      font-size: 0.82rem;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    /* ===== GOTCHAS ===== */
+    .gotcha {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: var(--space-sm);
+      background: #fff;
+      overflow: hidden;
+      transition: border-color 200ms;
+    }
+    .gotcha:hover { border-color: var(--warning-border); }
+    .gotcha-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-md);
+      cursor: pointer;
+      user-select: none;
+    }
+    .gotcha-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--warning-bg);
+      border-radius: 6px;
+    }
+    .gotcha-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex: 1;
+    }
+    .gotcha-chevron {
+      font-size: 10px;
+      color: var(--text-3);
+      transition: transform 250ms var(--ease-out-expo);
+      display: inline-block;
+    }
+    .gotcha.expanded .gotcha-chevron { transform: rotate(90deg); }
+
+    .gotcha-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 400ms var(--ease-out-expo);
+    }
+    .gotcha.expanded .gotcha-body { grid-template-rows: 1fr; }
+    .gotcha-body-inner {
+      overflow: hidden;
+    }
+    .gotcha-content {
+      padding: 0 var(--space-md) var(--space-md);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .gotcha-step {
+      margin-bottom: var(--space-md);
+    }
+    .gotcha-step:last-child { margin-bottom: 0; }
+    .gotcha-step-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .gotcha-step-label.tried { color: var(--text-3); }
+    .gotcha-step-label.broke { color: #C53030; }
+    .gotcha-step-label.fix { color: var(--success); }
+    .gotcha-step p { color: var(--text-2); }
+
+    .gotcha-code {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: var(--bg-alt);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-top: 6px;
+      line-height: 1.55;
+      white-space: pre;
+      color: var(--text-2);
+    }
+
+    /* ===== REFERENCE ===== */
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-bottom: var(--space-xl);
+    }
+    .ref-table th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-3);
+      padding: var(--space-sm) var(--space-sm);
+      border-bottom: 2px solid var(--border);
+    }
+    .ref-table td {
+      padding: var(--space-sm);
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-table code {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: var(--surface);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .ref-subtitle {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: var(--space-md);
+      margin-top: var(--space-xl);
+    }
+    .ref-subtitle:first-child { margin-top: 0; }
+
+    /* spacing visual */
+    .spacing-vis {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-xl);
+    }
+    .spacing-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .spacing-swatch {
+      background: var(--accent-light);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: 3px;
+    }
+    .spacing-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-3);
+    }
+
+    /* ===== MERGE STRATEGY ===== */
+    .merge-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: var(--space-lg);
+    }
+    .merge-box h4 {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: var(--space-sm);
+    }
+    .merge-box p {
+      font-size: 0.85rem;
+      color: var(--text-2);
+      line-height: 1.55;
+      margin-bottom: var(--space-sm);
+    }
+    .merge-box p:last-child { margin-bottom: 0; }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: var(--space-xl) var(--space-lg) var(--space-2xl);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+    .footer-left {
+      font-size: 0.78rem;
+      color: var(--text-3);
+    }
+    .footer-right {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-3);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .animate-in {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 600ms var(--ease-out-expo), transform 600ms var(--ease-out-expo);
+    }
+    .animate-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .stagger-1 { transition-delay: 50ms; }
+    .stagger-2 { transition-delay: 100ms; }
+    .stagger-3 { transition-delay: 150ms; }
+    .stagger-4 { transition-delay: 200ms; }
+    .stagger-5 { transition-delay: 250ms; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero { padding-top: var(--space-2xl); }
+      .section { padding-top: var(--space-2xl); }
+      .rm-fork {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .arch-step { gap: var(--space-sm); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-in { transition: opacity 200ms; transform: none; }
+      .pulse-dot::before { animation: none; }
+      .shimmer-text { animation: none; -webkit-text-fill-color: var(--text-3); background: none; }
+      .w-burst-children, .rm-details, .gotcha-body { transition-duration: 0.01ms; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="nav-title">Timeline Redesign</span>
+    <div class="nav-links">
+      <a href="#demo">Demo</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#gotchas">Gotchas</a>
+      <a href="#reference">Reference</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero animate-in">
+  <p class="hero-label">Engineering Handoff</p>
+  <h1 class="hero-title">Session Timeline<br>Redesign</h1>
+  <p class="hero-summary">Remove the card pattern. Group tool calls into collapsible work bursts. Make agent sessions read like conversations, not debug logs.</p>
+  <div class="hero-meta">
+    <span>iOS</span>
+    <span>Copilot Agents</span>
+    <span>6 Issues</span>
+    <span>~300 Lines</span>
+    <span>11 Files</span>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section class="section" id="problem">
+  <div class="animate-in">
+    <p class="section-label">00 / Context</p>
+    <h2 class="section-title">The Problem</h2>
+    <p class="section-desc">When a user opens a Copilot agent session on iOS, they see a flat list of <em>every</em> event — every tool call, every intermediate reasoning message, every file read. On a 30+ tool call session, the answer is buried under dozens of rows. There's no distinction between "what happened" and "what matters."</p>
+  </div>
+  <div class="animate-in stagger-1" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); max-width: 32rem;">
+    <div>
+      <p style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px;">Before</p>
+      <p style="font-size: 2.2rem; font-family: var(--font-display); line-height: 1.1; letter-spacing: -0.02em;">30+ rows</p>
+      <p style="font-size: 0.8rem; color: var(--text-3); margin-top: 4px;">Everything visible, nothing scannable</p>
+    </div>
+    <div>
+      <p style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px;">After</p>
+      <p style="font-size: 2.2rem; font-family: var(--font-display); line-height: 1.1; letter-spacing: -0.02em; color: var(--accent);">5–6 rows</p>
+      <p style="font-size: 0.8rem; color: var(--text-3); margin-top: 4px;">Tool calls collapsed into work bursts</p>
+    </div>
+  </div>
+  <div class="screenshot-slot animate-in stagger-2">
+    <span>📎</span>
+    Add real before/after screenshots here
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="section" id="demo">
+  <div class="animate-in">
+    <p class="section-label">01 / Interactive Demo</p>
+    <h2 class="section-title">Before &amp; After</h2>
+    <p class="section-desc">Toggle between views. In the "after" view, click a burst row to expand it.</p>
+  </div>
+
+  <div class="animate-in stagger-1">
+    <div class="demo-toggle">
+      <button class="active" data-view="before" onclick="setView('before')">Before</button>
+      <button data-view="after" onclick="setView('after')">After</button>
+    </div>
+
+    <div class="demo-panel">
+      <div class="demo-bar">
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <span class="demo-bar-label" id="demo-bar-label">All items flat</span>
+      </div>
+      <div class="demo-content">
+
+        <!-- BEFORE VIEW -->
+        <div class="demo-view active" id="view-before">
+          <div class="demo-count">15 items</div>
+
+          <div class="w-item w-user">
+            <div class="w-avatar">Y</div>
+            <div class="w-body">
+              <div class="w-role">You</div>
+              <div class="w-text">Fix the auth bug in login.swift</div>
+            </div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">Search files — auth</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">View — login.swift</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">View — auth.swift</div></div>
+          </div>
+          <div class="w-item w-agent">
+            <div class="w-avatar">✦</div>
+            <div class="w-body">
+              <div class="w-role">Copilot</div>
+              <div class="w-text">I found the issue in the auth module…</div>
+            </div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">View — tests/auth_test.swift</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">Edit — tests/auth_test.swift</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">Run — swift test</div></div>
+          </div>
+          <div class="w-item w-agent">
+            <div class="w-avatar">✦</div>
+            <div class="w-body">
+              <div class="w-role">Copilot</div>
+              <div class="w-text">Tests pass. Let me also update the config…</div>
+            </div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">View — config.swift</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">Edit — config.swift</div></div>
+          </div>
+          <div class="w-item w-tool">
+            <div class="w-icon">⚙</div>
+            <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
+          </div>
+          <div class="w-item w-agent">
+            <div class="w-avatar">✦</div>
+            <div class="w-body">
+              <div class="w-role">Copilot</div>
+              <div class="w-text">Done! I've fixed the authentication bug and updated the config.</div>
+            </div>
+          </div>
+
+          <div class="w-working">
+            <div class="pulse-dot"></div>
+            <span class="shimmer-text">Working…</span>
+          </div>
+        </div>
+
+        <!-- AFTER VIEW -->
+        <div class="demo-view" id="view-after">
+          <div class="demo-count">3 items + 2 burst rows</div>
+
+          <div class="w-item w-user">
+            <div class="w-avatar">Y</div>
+            <div class="w-body">
+              <div class="w-role">You</div>
+              <div class="w-text">Fix the auth bug in login.swift</div>
+            </div>
+          </div>
+
+          <div class="w-burst" onclick="toggleBurst(this)">
+            <div class="w-burst-header">
+              <span class="w-burst-chevron">▸</span>
+              <span class="w-burst-title">Used 7 tools</span>
+              <span class="w-burst-duration">14s</span>
+            </div>
+            <div class="w-burst-children">
+              <div class="w-burst-inner">
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">Search files — auth</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">View — login.swift</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">View — auth.swift</div></div>
+                </div>
+                <div class="w-item w-thinking">
+                  <div class="w-icon">✦</div>
+                  <div class="w-body"><div class="w-text">I found the issue in the auth module…</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">View — tests/auth_test.swift</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">Edit — tests/auth_test.swift</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">Run — swift test</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-item w-agent">
+            <div class="w-avatar">✦</div>
+            <div class="w-body">
+              <div class="w-role">Copilot</div>
+              <div class="w-text">Tests pass. Let me also update the config…</div>
+            </div>
+          </div>
+
+          <div class="w-burst" onclick="toggleBurst(this)">
+            <div class="w-burst-header">
+              <span class="w-burst-chevron">▸</span>
+              <span class="w-burst-title">Used 3 tools</span>
+              <span class="w-burst-duration">6s</span>
+            </div>
+            <div class="w-burst-children">
+              <div class="w-burst-inner">
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">View — config.swift</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">Edit — config.swift</div></div>
+                </div>
+                <div class="w-item w-tool">
+                  <div class="w-icon">⚙</div>
+                  <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-item w-agent">
+            <div class="w-avatar">✦</div>
+            <div class="w-body">
+              <div class="w-role">Copilot</div>
+              <div class="w-text">Done! I've fixed the authentication bug and updated the config.</div>
+            </div>
+          </div>
+
+          <div class="w-working">
+            <div class="pulse-dot"></div>
+            <span class="shimmer-text">Working…</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="demo-caption" id="demo-caption"><strong>15 items</strong> → every tool call visible. The answer is at the bottom.</p>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="section" id="roadmap">
+  <div class="animate-in">
+    <p class="section-label">02 / Implementation</p>
+    <h2 class="section-title">Roadmap</h2>
+    <p class="section-desc">6 issues, ordered by dependency. Each is independently shippable and testable. Click any issue to see implementation details.</p>
+  </div>
+
+  <div class="roadmap-tree animate-in stagger-1">
+    <!-- Issue 1 -->
+    <div class="rm-node p1" onclick="toggleIssue(this)">
+      <div class="rm-header">
+        <span class="rm-chevron">▸</span>
+        <span class="rm-num">#1</span>
+        <span class="rm-title">Flat Timeline</span>
+        <span class="rm-badge p1">P1</span>
+        <span class="rm-tag">Foundation</span>
+      </div>
+      <div class="rm-details">
+        <div class="rm-details-inner">
+          <div class="rm-detail-content">
+            <p><strong>Remove the session header cell and the <code>isExpanded</code> gate.</strong> All session items render chronologically — no expand/collapse at the session level.</p>
+            <p>In <code>AgentTaskSessionSection.swift</code>: remove the <code>AgentSessionHeaderCell</code> rendering and the <code>guard viewModel.isExpanded</code> gate. Keep the <code>userMessage</code> rendering and all item rendering logic.</p>
+            <div class="rm-files">
+              <span class="rm-file">AgentTaskSessionSection.swift</span>
+            </div>
+            <p class="rm-scope">~20 lines removed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issue 2 -->
+    <div class="rm-node p1" onclick="toggleIssue(this)">
+      <div class="rm-header">
+        <span class="rm-chevron">▸</span>
+        <span class="rm-num">#2</span>
+        <span class="rm-title">Remove Card Styling</span>
+        <span class="rm-badge p1">P1</span>
+      </div>
+      <div class="rm-depends">Depends on <code>#1</code></div>
+      <div class="rm-details">
+        <div class="rm-details-inner">
+          <div class="rm-detail-content">
+            <p><strong>Remove card backgrounds from all cells.</strong> Set <code>cardView.backgroundColor = .clear</code> and change card constraints from inset to edge-to-edge. Set consistent <code>grid(4)</code> (16pt) horizontal margins across all cell types.</p>
+            <p>Also set <code>MessageEventCell</code> top margin to <code>0</code> — the view already has internal vertical padding.</p>
+            <div class="rm-files">
+              <span class="rm-file">BaseCardCell.swift</span>
+              <span class="rm-file">MessageEventCell.swift</span>
+              <span class="rm-file">ToolCallEventCell.swift</span>
+              <span class="rm-file">PermissionRequestCell.swift</span>
+              <span class="rm-file">PromptEventCell.swift</span>
+              <span class="rm-file">WorkingIndicatorView.swift</span>
+              <span class="rm-file">+3 more</span>
+            </div>
+            <p class="rm-scope">~15 lines changed across 9 files</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fork: Issues 3 and 5 -->
+    <div class="rm-fork">
+      <!-- Issue 3 -->
+      <div class="rm-node p1" onclick="toggleIssue(this)">
+        <div class="rm-header">
+          <span class="rm-chevron">▸</span>
+          <span class="rm-num">#3</span>
+          <span class="rm-title">Work Burst Grouping</span>
+          <span class="rm-badge p1">P1</span>
+        </div>
+        <div class="rm-depends">Depends on <code>#1</code> <code>#2</code></div>
+        <div class="rm-details">
+          <div class="rm-details-inner">
+            <div class="rm-detail-content">
+              <p><strong>Core feature: group 3+ consecutive tool calls into a collapsible "Used N tools" row.</strong> Implement <code>groupToolCallBursts()</code> as a post-processing step on the final <code>[AgentSessionCellViewModel]</code> array.</p>
+              <p>Intermediate assistant messages between tool calls get absorbed into bursts as compact "thinking" rows. The last assistant message with content stays outside as the response.</p>
+              <p>Background agent ("task") tool calls, permissions, and prompts are NOT grouped — they break bursts.</p>
+              <div class="rm-files">
+                <span class="rm-file">AgentTaskViewModelBuilder.swift</span>
+                <span class="rm-file">ToolCallEventViewModel.swift</span>
+                <span class="rm-file">AgentTaskSessionSection.swift</span>
+              </div>
+              <p class="rm-scope">~100 lines added</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 4 (child of 3) -->
+        <div class="rm-node p2" onclick="toggleIssue(this); event.stopPropagation();" style="margin-top: var(--space-md);">
+          <div class="rm-header">
+            <span class="rm-chevron">▸</span>
+            <span class="rm-num">#4</span>
+            <span class="rm-title">Burst Polish</span>
+            <span class="rm-badge p2">P2</span>
+          </div>
+          <div class="rm-depends">Depends on <code>#3</code></div>
+          <div class="rm-details">
+            <div class="rm-details-inner">
+              <div class="rm-detail-content">
+                <p><strong>Three refinements:</strong> (a) Duration display on burst headers — "12s", "2m 30s". (b) Auto-expand the last burst in a session. (c) Remove subtitles from individual tool call rows (grep patterns, search queries) — subtitle space is reserved for burst duration.</p>
+                <div class="rm-files">
+                  <span class="rm-file">ToolCallEventViewModel.swift</span>
+                  <span class="rm-file">AgentTaskViewModelBuilder.swift</span>
+                </div>
+                <p class="rm-scope">~25 lines changed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issue 5 -->
+      <div class="rm-node p2" onclick="toggleIssue(this)">
+        <div class="rm-header">
+          <span class="rm-chevron">▸</span>
+          <span class="rm-num">#5</span>
+          <span class="rm-title">Working Indicator</span>
+          <span class="rm-badge p2">P2</span>
+        </div>
+        <div class="rm-depends">Depends on <code>#2</code></div>
+        <div class="rm-details">
+          <div class="rm-details-inner">
+            <div class="rm-detail-content">
+              <p><strong>Replace the rotating commit square with a pulsing dot + shimmering text.</strong> The dot is an 8pt circle with a repeating scale+fade animation. The shimmer is a gradient highlight sweeping across "Working…" text.</p>
+              <p>Font changes from <code>.footnote</code> to <code>.subheadline</code> to match tool call rows. Margins match <code>ToolCallEventCell</code>.</p>
+              <div class="rm-files">
+                <span class="rm-file">WorkingIndicatorView.swift</span>
+              </div>
+              <p class="rm-scope">~60 lines changed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issue 6 -->
+    <div class="rm-node p3" onclick="toggleIssue(this)">
+      <div class="rm-header">
+        <span class="rm-chevron">▸</span>
+        <span class="rm-num">#6</span>
+        <span class="rm-title">Cleanup</span>
+        <span class="rm-badge p3">P3</span>
+      </div>
+      <div class="rm-depends">Depends on <code>#1</code>–<code>#5</code> · Do this last</div>
+      <div class="rm-details">
+        <div class="rm-details-inner">
+          <div class="rm-detail-content">
+            <p><strong>Remove dead code and debug logging.</strong> Delete <code>OutcomeMessageCell</code>, <code>finalOutcome</code> / <code>itemsWithoutFinalOutcome</code> computed properties, <code>AgentSessionHeaderCell</code>, old <code>init(fromGroup:)</code> initializer, and all <code>#if DEBUG</code> print statements from <code>groupToolCallBursts()</code>.</p>
+            <p>Search each symbol before deleting to confirm it's unreferenced. Update <code>.pbxproj</code> if needed.</p>
+            <div class="rm-files">
+              <span class="rm-file">AgentTaskViewModelBuilder.swift</span>
+              <span class="rm-file">MessageEventCell.swift</span>
+              <span class="rm-file">AgentTaskViewModel.swift</span>
+              <span class="rm-file">AgentTaskSessionSection.swift</span>
+              <span class="rm-file">ToolCallEventViewModel.swift</span>
+            </div>
+            <p class="rm-scope">~80 lines removed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="merge-box animate-in stagger-2" style="margin-top: var(--space-xl);">
+    <h4>Merge Strategy</h4>
+    <p><strong>Recommended:</strong> Ship issues 1–4 together as one PR (they're tightly coupled — the flat timeline without burst grouping is noisy). Issue 5 as a separate PR. Issue 6 as a final cleanup PR.</p>
+    <p><strong>Branch note:</strong> Prototype is on <code>ui-iterations</code>. Engineers should branch from <code>main</code> and re-implement using these specs — the prototype branch has debug logging and dead code that shouldn't carry over.</p>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="animate-in">
+    <p class="section-label">03 / Architecture</p>
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-desc">The event processing pipeline. New code enters at step 3 — everything else is existing infrastructure.</p>
+  </div>
+
+  <div class="arch-flow animate-in stagger-1">
+    <div class="arch-step">
+      <div class="arch-num">1</div>
+      <div class="arch-body">
+        <div class="arch-name">Raw Events</div>
+        <div class="arch-desc">Server-sent events arrive: tool call starts, tool call completions, assistant messages, permissions.</div>
+      </div>
+    </div>
+    <div class="arch-step">
+      <div class="arch-num">2</div>
+      <div class="arch-body">
+        <div class="arch-name"><code>makeSessionItemsAndMetadata()</code></div>
+        <div class="arch-desc">Event loop pairs tool start/complete events into <code>ToolCall</code> objects. <code>flushTools()</code> emits small groups (1–2 tools) because assistant messages between tool calls trigger flushes. Keep this simple.</div>
+      </div>
+    </div>
+    <div class="arch-step highlight">
+      <div class="arch-num">3</div>
+      <div class="arch-body">
+        <div class="arch-name"><code>groupToolCallBursts()</code> <span style="font-size: 0.72rem; color: var(--accent); font-weight: 600; font-family: var(--font-body);">← NEW</span></div>
+        <div class="arch-desc">Post-processing step. Scans the final array left-to-right and groups 3+ consecutive tool calls into burst headers. Absorbs intermediate assistant messages as "thinking" items inside bursts.</div>
+      </div>
+    </div>
+    <div class="arch-step highlight">
+      <div class="arch-num">4</div>
+      <div class="arch-body">
+        <div class="arch-name">Auto-expand last burst <span style="font-size: 0.72rem; color: var(--accent); font-weight: 600; font-family: var(--font-body);">← NEW</span></div>
+        <div class="arch-desc">One-liner after grouping. If the last item is a burst, set <code>isExpanded = true</code>. This ensures users always see the most recent work.</div>
+      </div>
+    </div>
+    <div class="arch-step">
+      <div class="arch-num">5</div>
+      <div class="arch-body">
+        <div class="arch-name"><code>AgentSessionSection.viewModels</code></div>
+        <div class="arch-desc">Builds <code>[ViewModelBinder]</code> array for the <code>UITableView</code>. <code>makeToolCallViewModels(for:)</code> handles burst headers + expanded children using <code>ToolCallEventCell</code> — not <code>ToolCallEventGroupItemCell</code>.</div>
+      </div>
+    </div>
+    <div class="arch-step">
+      <div class="arch-num">6</div>
+      <div class="arch-body">
+        <div class="arch-name">UITableView via Adapter</div>
+        <div class="arch-desc"><code>UIHostingConfiguration</code> wraps SwiftUI views in UIKit cells. <code>.margins()</code> controls cell-level spacing. The adapter renders <code>ViewModelBinder</code> array into rows.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GOTCHAS -->
+<section class="section" id="gotchas">
+  <div class="animate-in">
+    <p class="section-label">04 / Lessons Learned</p>
+    <h2 class="section-title">Gotchas</h2>
+    <p class="section-desc">Non-obvious bugs and dead ends hit during prototyping. These will save you time.</p>
+  </div>
+
+  <div class="animate-in stagger-1">
+    <!-- Gotcha 1 -->
+    <div class="gotcha" onclick="toggleGotcha(this)">
+      <div class="gotcha-header">
+        <div class="gotcha-icon">⚡</div>
+        <span class="gotcha-title">Grouping in flushTools() doesn't work</span>
+        <span class="gotcha-chevron">▸</span>
+      </div>
+      <div class="gotcha-body">
+        <div class="gotcha-body-inner">
+          <div class="gotcha-content">
+            <div class="gotcha-step">
+              <div class="gotcha-step-label tried">What we tried</div>
+              <p>Grouping tool calls inside <code>flushTools()</code> in the event loop.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label broke">What went wrong</div>
+              <p>Assistant messages between tool calls trigger <code>flushTools()</code>, so each flush only contains 1–2 tool calls. You never get groups of 3+.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label fix">The fix</div>
+              <p><code>groupToolCallBursts()</code> runs as a <strong>post-processing step</strong> on the final <code>[AgentSessionCellViewModel]</code> array. This is the only place where you can see the full sequence.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gotcha 2 -->
+    <div class="gotcha" onclick="toggleGotcha(this)">
+      <div class="gotcha-header">
+        <div class="gotcha-icon">⚡</div>
+        <span class="gotcha-title">All bursts auto-expand (not just the last one)</span>
+        <span class="gotcha-chevron">▸</span>
+      </div>
+      <div class="gotcha-body">
+        <div class="gotcha-body-inner">
+          <div class="gotcha-content">
+            <div class="gotcha-step">
+              <div class="gotcha-step-label tried">What we tried</div>
+              <p><code>isExpanded = status == .running</code> on burst headers.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label broke">What went wrong</div>
+              <p>Some tool calls in completed sessions never received completion events, so their status stayed <code>.running</code>. ALL bursts expanded.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label fix">The fix</div>
+              <p>Default all bursts to <code>isExpanded = false</code>. Then, as a separate step after grouping, set <code>isExpanded = true</code> only on the very last item if it's a burst.</p>
+              <div class="gotcha-code">if let lastIndex = items.indices.last,
+   case .toolCall(var vm) = items[lastIndex],
+   vm.groupChildren != nil {
+    vm.isExpanded = true
+    items[lastIndex] = .toolCall(vm)
+}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gotcha 3 -->
+    <div class="gotcha" onclick="toggleGotcha(this)">
+      <div class="gotcha-header">
+        <div class="gotcha-icon">⚡</div>
+        <span class="gotcha-title">Final assistant message gets swallowed by burst</span>
+        <span class="gotcha-chevron">▸</span>
+      </div>
+      <div class="gotcha-body">
+        <div class="gotcha-body-inner">
+          <div class="gotcha-content">
+            <div class="gotcha-step">
+              <div class="gotcha-step-label tried">What we tried</div>
+              <p><code>flushBurst()</code> that creates the burst group and emits pending messages.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label broke">What went wrong</div>
+              <p>When the burst was the last thing in the array, <code>pendingMessages</code> (the final response) were silently dropped.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label fix">The fix</div>
+              <p><code>flushBurst()</code> must ALWAYS emit <code>pendingMessages</code> after the burst. Intermediate assistant messages → absorbed as thinking items. The last assistant message with content → stays outside as the response. See the <code>lastAssistantIndex</code> logic.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gotcha 4 -->
+    <div class="gotcha" onclick="toggleGotcha(this)">
+      <div class="gotcha-header">
+        <div class="gotcha-icon">⚡</div>
+        <span class="gotcha-title">Expanded children render as mono text, not icon rows</span>
+        <span class="gotcha-chevron">▸</span>
+      </div>
+      <div class="gotcha-body">
+        <div class="gotcha-body-inner">
+          <div class="gotcha-content">
+            <div class="gotcha-step">
+              <div class="gotcha-step-label tried">What we tried</div>
+              <p>Used <code>ToolCallEventGroupItemCell</code> for expanded burst children.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label broke">What went wrong</div>
+              <p>That cell renders as plain monospace text (the old grouped-by-name style). Users expected icon + title format.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label fix">The fix</div>
+              <p>Use <code>ToolCallEventCell</code> for expanded children — same cell type as standalone tool calls. Each child gets its proper icon, title, and tap-to-view-output behavior.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gotcha 5 -->
+    <div class="gotcha" onclick="toggleGotcha(this)">
+      <div class="gotcha-header">
+        <div class="gotcha-icon">⚡</div>
+        <span class="gotcha-title">Thinking messages leak outside bursts</span>
+        <span class="gotcha-chevron">▸</span>
+      </div>
+      <div class="gotcha-body">
+        <div class="gotcha-body-inner">
+          <div class="gotcha-content">
+            <div class="gotcha-step">
+              <div class="gotcha-step-label tried">What we tried</div>
+              <p>Only absorbing messages with <code>reasoning</code> field and empty <code>content</code>.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label broke">What went wrong</div>
+              <p>Some assistant "thinking" messages put their text in <code>content</code> rather than <code>reasoning</code>. The narrow check missed them.</p>
+            </div>
+            <div class="gotcha-step">
+              <div class="gotcha-step-label fix">The fix</div>
+              <p>Absorb ALL pending assistant messages into the burst, EXCEPT the last one with content. Use index-based detection:</p>
+              <div class="gotcha-code">let lastAssistantIndex = pendingMessages.lastIndex { item in
+    if case .message(let msg) = item,
+       msg.role == .assistant,
+       !msg.content.isEmpty { return true }
+    return false
+}
+// Before lastAssistantIndex → thinking item
+// lastAssistantIndex → regular message outside burst</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFERENCE -->
+<section class="section" id="reference">
+  <div class="animate-in">
+    <p class="section-label">05 / Reference</p>
+    <h2 class="section-title">Quick Reference</h2>
+  </div>
+
+  <div class="animate-in stagger-1">
+    <h3 class="ref-subtitle">Spacing Values</h3>
+    <div class="spacing-vis">
+      <div class="spacing-block">
+        <div class="spacing-swatch" style="width: 8px; height: 8px;"></div>
+        <span class="spacing-label">halfGrid 2pt</span>
+      </div>
+      <div class="spacing-block">
+        <div class="spacing-swatch" style="width: 16px; height: 16px;"></div>
+        <span class="spacing-label">grid(1) 4pt</span>
+      </div>
+      <div class="spacing-block">
+        <div class="spacing-swatch" style="width: 24px; height: 24px;"></div>
+        <span class="spacing-label">grid(2) 8pt</span>
+      </div>
+      <div class="spacing-block">
+        <div class="spacing-swatch" style="width: 32px; height: 32px;"></div>
+        <span class="spacing-label">grid(3) 12pt</span>
+      </div>
+      <div class="spacing-block">
+        <div class="spacing-swatch" style="width: 40px; height: 40px;"></div>
+        <span class="spacing-label">grid(4) 16pt</span>
+      </div>
+      <div class="spacing-block">
+        <div class="spacing-swatch" style="width: 56px; height: 56px;"></div>
+        <span class="spacing-label">grid(6) 24pt</span>
+      </div>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>Element</th>
+          <th>Horizontal</th>
+          <th>Top</th>
+          <th>Bottom</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tool call rows</td>
+          <td><code>grid(4)</code> 16pt</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>Message cells</td>
+          <td><code>grid(4)</code> 16pt</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>Inline user messages</td>
+          <td><code>grid(4)</code> 16pt</td>
+          <td><code>grid(6)</code> 24pt</td>
+          <td><code>grid(4)</code> 16pt</td>
+        </tr>
+        <tr>
+          <td>Session user messages</td>
+          <td><code>grid(4)</code> 16pt</td>
+          <td><code>grid(4)</code> 16pt</td>
+          <td><code>grid(4)</code> 16pt</td>
+        </tr>
+        <tr>
+          <td>Working indicator</td>
+          <td><code>grid(4)</code> 16pt</td>
+          <td>0</td>
+          <td><code>grid(6)</code> 24pt</td>
+        </tr>
+        <tr>
+          <td>Tool call icon</td>
+          <td colspan="3">16×16pt container</td>
+        </tr>
+        <tr>
+          <td>Pulsing dot</td>
+          <td colspan="3">8pt circle in 16×16pt container</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="ref-subtitle">Key Types</h3>
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>AgentSessionCellViewModel</code></td>
+          <td>Enum: <code>.toolCall</code>, <code>.message</code>, <code>.permissionRequest</code>, <code>.prompt</code>, <code>.workingIndicator</code></td>
+        </tr>
+        <tr>
+          <td><code>ToolCallEventViewModel</code></td>
+          <td>Covers individual tools AND burst headers — check <code>groupChildren != nil</code></td>
+        </tr>
+        <tr>
+          <td><code>BaseCardCell.Position</code></td>
+          <td><code>.top</code>, <code>.middle</code>, <code>.bottom</code>, <code>.standalone</code> — controls corner radius and spacing</td>
+        </tr>
+        <tr>
+          <td><code>grid(n)</code></td>
+          <td><code>n × 4pt</code>. <code>halfGrid = 2pt</code>. From <code>GitHubUI/Grid.swift</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="ref-subtitle">Platform Alignment</h3>
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>iOS (New)</th>
+          <th>Android</th>
+          <th>Web</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tool grouping</td>
+          <td>Work bursts (consecutive runs)</td>
+          <td>Same-name tool groups</td>
+          <td>File-path accordions</td>
+        </tr>
+        <tr>
+          <td>Collapse behavior</td>
+          <td>Bursts collapse; timeline is flat</td>
+          <td>Tool groups collapse</td>
+          <td>Intent groups collapse</td>
+        </tr>
+        <tr>
+          <td>Thinking/reasoning</td>
+          <td>Inside bursts as compact rows</td>
+          <td>Not shown separately</td>
+          <td>Not shown separately</td>
+        </tr>
+        <tr>
+          <td>Working indicator</td>
+          <td>Pulse dot + shimmer</td>
+          <td>Spinner</td>
+          <td>ASCII dots + timer</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="ref-subtitle">What's Not Changing</h3>
+    <div style="columns: 2; column-gap: var(--space-xl); font-size: 0.85rem; color: var(--text-2); line-height: 1.8;">
+      <div>✓ Task header</div>
+      <div>✓ User message bubble</div>
+      <div>✓ Permission cards (pending)</div>
+      <div>✓ Prompt cards</div>
+      <div>✓ Chat input bar</div>
+      <div>✓ Auto-scroll behavior</div>
+    </div>
+  </div>
+
+  <div class="screenshot-slot animate-in stagger-2" style="margin-top: var(--space-xl);">
+    <span>📎</span>
+    Add annotated screenshots, screen recordings, or Figma links here
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left">
+    Session Timeline Redesign · Engineering Handoff
+  </div>
+  <div class="footer-right">
+    Modules/GitHub/Sources/Copilot/Agents/
+  </div>
+</footer>
+
+<script>
+  // Demo toggle
+  function setView(view) {
+    document.getElementById('view-before').classList.toggle('active', view === 'before');
+    document.getElementById('view-after').classList.toggle('active', view === 'after');
+    document.querySelectorAll('.demo-toggle button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === view);
+    });
+    const barLabel = document.getElementById('demo-bar-label');
+    const caption = document.getElementById('demo-caption');
+    if (view === 'before') {
+      barLabel.textContent = 'All items flat';
+      caption.innerHTML = '<strong>15 items</strong> — every tool call visible. The answer is buried at the bottom.';
+    } else {
+      barLabel.textContent = 'Work bursts';
+      caption.innerHTML = '<strong>5 items</strong> — tool calls collapsed into burst rows. Click a burst to expand.';
+    }
+  }
+
+  // Burst expand/collapse
+  function toggleBurst(el) {
+    el.classList.toggle('expanded');
+  }
+
+  // Issue expand/collapse
+  function toggleIssue(el) {
+    el.classList.toggle('expanded');
+  }
+
+  // Gotcha expand/collapse
+  function toggleGotcha(el) {
+    el.classList.toggle('expanded');
+  }
+
+  // Entrance animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body>
+</html>
