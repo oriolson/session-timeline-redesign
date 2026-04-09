@@ -174,233 +174,6 @@
       line-height: 1.6;
     }
 
-    /* ===== DEMO ===== */
-    .demo-toggle {
-      display: inline-flex;
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 3px;
-      margin-bottom: var(--space-lg);
-    }
-    .demo-toggle button {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 0.45rem 1.1rem;
-      border: none;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--text-2);
-      cursor: pointer;
-      transition: all 200ms var(--ease-out-quart);
-    }
-    .demo-toggle button.active {
-      background: #fff;
-      color: var(--text);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .demo-panel {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: #fff;
-      overflow: hidden;
-    }
-    .demo-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 14px;
-      background: var(--bg-alt);
-      border-bottom: 1px solid var(--border-light);
-    }
-    .demo-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-    }
-    .demo-bar-label {
-      margin-left: auto;
-      font-size: 0.65rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-3);
-    }
-    .demo-content {
-      padding: var(--space-md) var(--space-md) var(--space-lg);
-      min-height: 380px;
-    }
-    .demo-view { display: none; }
-    .demo-view.active { display: block; }
-
-    .demo-count {
-      text-align: right;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-3);
-      margin-bottom: var(--space-md);
-      padding-right: 2px;
-    }
-
-    /* wireframe items */
-    .w-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      margin-bottom: 2px;
-      transition: background 150ms;
-    }
-    .w-avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      margin-top: 1px;
-    }
-    .w-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      margin-top: 1px;
-    }
-    .w-body { flex: 1; min-width: 0; }
-    .w-role {
-      font-size: 0.65rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 2px;
-    }
-    .w-text {
-      font-size: 0.85rem;
-      line-height: 1.45;
-    }
-
-    .w-user { background: var(--user-bg); }
-    .w-user .w-avatar { background: var(--user-accent); color: #fff; }
-    .w-user .w-role { color: var(--user-accent); }
-
-    .w-agent { background: var(--agent-bg); }
-    .w-agent .w-avatar { background: var(--text-3); color: #fff; font-size: 13px; }
-    .w-agent .w-role { color: var(--text-2); }
-    .w-agent .w-text { color: var(--text-2); }
-
-    .w-tool .w-icon { background: var(--tool-bg); border: 1px solid var(--border-light); color: var(--tool-accent); }
-    .w-tool .w-text { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-2); }
-
-    .w-thinking .w-icon { background: var(--accent-light); border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font-size: 13px; }
-    .w-thinking .w-text { font-size: 0.8rem; color: var(--text-2); font-style: italic; }
-
-    /* burst */
-    .w-burst-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 150ms;
-      user-select: none;
-    }
-    .w-burst-header:hover { background: var(--accent-light); }
-    .w-burst-chevron {
-      font-size: 11px;
-      color: var(--burst-accent);
-      transition: transform 300ms var(--ease-out-expo);
-      display: inline-block;
-      width: 16px;
-      text-align: center;
-    }
-    .w-burst.expanded .w-burst-chevron { transform: rotate(90deg); }
-    .w-burst-title {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--burst-accent);
-    }
-    .w-burst-duration {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-3);
-      margin-left: auto;
-    }
-    .w-burst-children {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 350ms var(--ease-out-expo);
-    }
-    .w-burst.expanded .w-burst-children {
-      grid-template-rows: 1fr;
-    }
-    .w-burst-inner {
-      overflow: hidden;
-      padding-left: 24px;
-      border-left: 2px solid var(--accent-light);
-      margin-left: 17px;
-    }
-    .w-burst-inner .w-item { padding: 5px 10px; }
-
-    /* working indicator */
-    .w-working {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 10px;
-    }
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      position: relative;
-      margin: 0 8px;
-    }
-    .pulse-dot::before, .pulse-dot::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-    .pulse-dot::before {
-      animation: pulse-ring 1.2s ease-out infinite;
-    }
-    @keyframes pulse-ring {
-      0% { transform: scale(1); opacity: 0.6; }
-      100% { transform: scale(2.8); opacity: 0; }
-    }
-    .shimmer-text {
-      font-size: 0.85rem;
-      color: var(--text-3);
-      background: linear-gradient(90deg, var(--text-3) 0%, var(--text-3) 40%, var(--accent) 50%, var(--text-3) 60%, var(--text-3) 100%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 2s linear infinite;
-    }
-    @keyframes shimmer {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
-    }
-
-    .demo-caption {
-      margin-top: var(--space-md);
-      font-size: 0.8rem;
-      color: var(--text-3);
-      text-align: center;
-    }
-    .demo-caption strong { color: var(--text-2); font-weight: 600; }
-
     /* screenshot placeholder */
     .screenshot-slot {
       margin-top: var(--space-lg);
@@ -836,9 +609,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .animate-in { transition: opacity 200ms; transform: none; }
-      .pulse-dot::before { animation: none; }
-      .shimmer-text { animation: none; -webkit-text-fill-color: var(--text-3); background: none; }
-      .w-burst-children, .rm-details, .gotcha-body { transition-duration: 0.01ms; }
+      .rm-details, .gotcha-body { transition-duration: 0.01ms; }
     }
   </style>
 </head>
@@ -850,7 +621,6 @@
   <div class="nav-inner">
     <span class="nav-title">Timeline Redesign</span>
     <div class="nav-links">
-      <a href="#demo">Demo</a>
       <a href="#roadmap">Roadmap</a>
       <a href="#architecture">Architecture</a>
       <a href="#gotchas">Gotchas</a>
@@ -898,220 +668,12 @@
   </div>
 </section>
 
-<!-- DEMO -->
-<section class="section" id="demo">
-  <div class="animate-in">
-    <p class="section-label">01 / Interactive Demo</p>
-    <h2 class="section-title">Before &amp; After</h2>
-    <p class="section-desc">Toggle between views. In the "after" view, click a burst row to expand it.</p>
-  </div>
 
-  <div class="animate-in stagger-1">
-    <div class="demo-toggle">
-      <button class="active" data-view="before" onclick="setView('before')">Before</button>
-      <button data-view="after" onclick="setView('after')">After</button>
-    </div>
-
-    <div class="demo-panel">
-      <div class="demo-bar">
-        <div class="demo-dot"></div>
-        <div class="demo-dot"></div>
-        <div class="demo-dot"></div>
-        <span class="demo-bar-label" id="demo-bar-label">All items flat</span>
-      </div>
-      <div class="demo-content">
-
-        <!-- BEFORE VIEW -->
-        <div class="demo-view active" id="view-before">
-          <div class="demo-count">15 items</div>
-
-          <div class="w-item w-user">
-            <div class="w-avatar">Y</div>
-            <div class="w-body">
-              <div class="w-role">You</div>
-              <div class="w-text">Fix the auth bug in login.swift</div>
-            </div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">Search files — auth</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">View — login.swift</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">View — auth.swift</div></div>
-          </div>
-          <div class="w-item w-agent">
-            <div class="w-avatar">✦</div>
-            <div class="w-body">
-              <div class="w-role">Copilot</div>
-              <div class="w-text">I found the issue in the auth module…</div>
-            </div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">View — tests/auth_test.swift</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">Edit — tests/auth_test.swift</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">Run — swift test</div></div>
-          </div>
-          <div class="w-item w-agent">
-            <div class="w-avatar">✦</div>
-            <div class="w-body">
-              <div class="w-role">Copilot</div>
-              <div class="w-text">Tests pass. Let me also update the config…</div>
-            </div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">View — config.swift</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">Edit — config.swift</div></div>
-          </div>
-          <div class="w-item w-tool">
-            <div class="w-icon">⚙</div>
-            <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
-          </div>
-          <div class="w-item w-agent">
-            <div class="w-avatar">✦</div>
-            <div class="w-body">
-              <div class="w-role">Copilot</div>
-              <div class="w-text">Done! I've fixed the authentication bug and updated the config.</div>
-            </div>
-          </div>
-
-          <div class="w-working">
-            <div class="pulse-dot"></div>
-            <span class="shimmer-text">Working…</span>
-          </div>
-        </div>
-
-        <!-- AFTER VIEW -->
-        <div class="demo-view" id="view-after">
-          <div class="demo-count">3 items + 2 burst rows</div>
-
-          <div class="w-item w-user">
-            <div class="w-avatar">Y</div>
-            <div class="w-body">
-              <div class="w-role">You</div>
-              <div class="w-text">Fix the auth bug in login.swift</div>
-            </div>
-          </div>
-
-          <div class="w-burst" onclick="toggleBurst(this)">
-            <div class="w-burst-header">
-              <span class="w-burst-chevron">▸</span>
-              <span class="w-burst-title">Used 7 tools</span>
-              <span class="w-burst-duration">14s</span>
-            </div>
-            <div class="w-burst-children">
-              <div class="w-burst-inner">
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">Search files — auth</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">View — login.swift</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">View — auth.swift</div></div>
-                </div>
-                <div class="w-item w-thinking">
-                  <div class="w-icon">✦</div>
-                  <div class="w-body"><div class="w-text">I found the issue in the auth module…</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">View — tests/auth_test.swift</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">Edit — tests/auth_test.swift</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">Run — swift test</div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="w-item w-agent">
-            <div class="w-avatar">✦</div>
-            <div class="w-body">
-              <div class="w-role">Copilot</div>
-              <div class="w-text">Tests pass. Let me also update the config…</div>
-            </div>
-          </div>
-
-          <div class="w-burst" onclick="toggleBurst(this)">
-            <div class="w-burst-header">
-              <span class="w-burst-chevron">▸</span>
-              <span class="w-burst-title">Used 3 tools</span>
-              <span class="w-burst-duration">6s</span>
-            </div>
-            <div class="w-burst-children">
-              <div class="w-burst-inner">
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">View — config.swift</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">Edit — config.swift</div></div>
-                </div>
-                <div class="w-item w-tool">
-                  <div class="w-icon">⚙</div>
-                  <div class="w-body"><div class="w-text">Edit — auth.swift</div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="w-item w-agent">
-            <div class="w-avatar">✦</div>
-            <div class="w-body">
-              <div class="w-role">Copilot</div>
-              <div class="w-text">Done! I've fixed the authentication bug and updated the config.</div>
-            </div>
-          </div>
-
-          <div class="w-working">
-            <div class="pulse-dot"></div>
-            <span class="shimmer-text">Working…</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <p class="demo-caption" id="demo-caption"><strong>15 items</strong> → every tool call visible. The answer is at the bottom.</p>
-  </div>
-</section>
 
 <!-- ROADMAP -->
 <section class="section" id="roadmap">
   <div class="animate-in">
-    <p class="section-label">02 / Implementation</p>
+    <p class="section-label">01 / Implementation</p>
     <h2 class="section-title">Roadmap</h2>
     <p class="section-desc">6 issues, ordered by dependency. Each is independently shippable and testable. Click any issue to see implementation details.</p>
   </div>
@@ -1282,7 +844,7 @@
 <!-- ARCHITECTURE -->
 <section class="section" id="architecture">
   <div class="animate-in">
-    <p class="section-label">03 / Architecture</p>
+    <p class="section-label">02 / Architecture</p>
     <h2 class="section-title">How It Works</h2>
     <p class="section-desc">The event processing pipeline. New code enters at step 3 — everything else is existing infrastructure.</p>
   </div>
@@ -1336,7 +898,7 @@
 <!-- GOTCHAS -->
 <section class="section" id="gotchas">
   <div class="animate-in">
-    <p class="section-label">04 / Lessons Learned</p>
+    <p class="section-label">03 / Lessons Learned</p>
     <h2 class="section-title">Gotchas</h2>
     <p class="section-desc">Non-obvious bugs and dead ends hit during prototyping. These will save you time.</p>
   </div>
@@ -1496,7 +1058,7 @@
 <!-- REFERENCE -->
 <section class="section" id="reference">
   <div class="animate-in">
-    <p class="section-label">05 / Reference</p>
+    <p class="section-label">04 / Reference</p>
     <h2 class="section-title">Quick Reference</h2>
   </div>
 
@@ -1674,25 +1236,7 @@
 </footer>
 
 <script>
-  // Demo toggle
-  function setView(view) {
-    document.getElementById('view-before').classList.toggle('active', view === 'before');
-    document.getElementById('view-after').classList.toggle('active', view === 'after');
-    document.querySelectorAll('.demo-toggle button').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.view === view);
-    });
-    const barLabel = document.getElementById('demo-bar-label');
-    const caption = document.getElementById('demo-caption');
-    if (view === 'before') {
-      barLabel.textContent = 'All items flat';
-      caption.innerHTML = '<strong>15 items</strong> — every tool call visible. The answer is buried at the bottom.';
-    } else {
-      barLabel.textContent = 'Work bursts';
-      caption.innerHTML = '<strong>5 items</strong> — tool calls collapsed into burst rows. Click a burst to expand.';
-    }
-  }
-
-  // Burst expand/collapse
+  // Burst expand/collapse (used in gotchas code examples)
   function toggleBurst(el) {
     el.classList.toggle('expanded');
   }
